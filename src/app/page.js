@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import AddToCartButton from "@/components/AddToCartButton";
 
 export const dynamic = "force-dynamic";
 
@@ -11,10 +12,7 @@ export default async function Home() {
 
   return (
     <main className="mx-auto max-w-5xl p-6">
-      <header className="mb-8 border-b pb-4">
-        <h1 className="text-3xl font-bold">Librería La Cosecha</h1>
-        <p className="text-gray-600">Tu librería en línea</p>
-      </header>
+      <h1 className="mb-6 text-xl text-gray-600">Nuestro catálogo</h1>
 
       {error && (
         <p className="text-red-600">Error al cargar productos: {error.message}</p>
@@ -37,6 +35,7 @@ export default async function Home() {
               })}
             </p>
             <p className="text-sm text-gray-500">Disponibles: {p.stock}</p>
+            <AddToCartButton producto={p} />
           </article>
         ))}
       </div>
