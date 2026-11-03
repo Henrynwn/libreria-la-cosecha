@@ -11,6 +11,34 @@ export default function CarritoPage() {
   const { items, cambiarCantidad, quitar, vaciar, total, listo } = useCart();
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState("");
+
+  async function pagar() {
+    setCargando(true);
+    setError("");
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre,
+          email,
+          items: items.map((i) => ({ id: i.id, cantidad: i.cantidad })),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        setError(data.error || "No se pudo iniciar el pago.");
+        setCargando(false);
+        return;
+      }
+      window.location.href = data.url;
+    } catch {
+      setError("Error de conexión. Intenta de nuevo.");
+      setCargando(false);
+    }
+  }
 
   if (!listo) return <main className="mx-auto max-w-5xl p-6">Cargando…</main>;
 
@@ -100,11 +128,13 @@ export default function CarritoPage() {
         </div>
 
         <button
-          disabled
-          className="mt-4 w-full rounded-md bg-blue-600 px-4 py-3 text-white disabled:cursor-not-allowed disabled:bg-gray-400"
+          onClick={pagar}
+          disabled={!datosValidos || cargando}
+          className="mt-4 w-full rounded-md bg-blue-600 px-4 py-3 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
         >
-          Pagar con Mercado Pago (próximo paso)
+          {cargando ? "Redirigiendo a Mercado Pago…" : "Pagar con Mercado Pago"}
         </button>
+        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
         {!datosValidos && (
           <p className="mt-2 text-sm text-gray-500">
             Llena tu nombre y correo para continuar.
